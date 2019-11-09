@@ -7,6 +7,8 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
+        <Button Content="Login" HorizontalAlignment="Left" Margin="562,203,0,0" VerticalAlignment="Top" Height="81" Width="201" Click="Login_Click"/>
+        <TextBox x:Name="ChatOutput" TextWrapping="Wrap" Margin="29,17,296,29"/>
 
     </Grid>
 </Window>
