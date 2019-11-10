@@ -46,5 +46,17 @@ namespace MixerTestsaBot {
                 this["BotName"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("vifs")]
+        public string Channel {
+            get {
+                return ((string)(this["Channel"]));
+            }
+            set {
+                this["Channel"] = value;
+            }
+        }
     }
 }

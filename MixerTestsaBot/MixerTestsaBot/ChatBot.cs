@@ -12,6 +12,8 @@ namespace MixerTestsaBot {
         private string Uri;
         private string BrainFile = "brain.txt";
         private string QuoteFile = "quote.txt";
+        private Random Rng = new Random();
+        private const int MAXGEN = 450;
 
         public ChatBot() {
             Uri = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
@@ -20,12 +22,13 @@ namespace MixerTestsaBot {
         }
 
         public string? parseInput(string message) {
-            string? output = null; 
-            if(message.StartsWith("!")) {
-                if(message.ToLower().StartsWith("!quote")) {
+            string? output = null;
+            if (message.StartsWith("!")) {
+                if (message.ToLower().StartsWith("!quote")) {
                     output = ParseQuoteCommand(message);
                 }
-            } else {
+            }
+            else {
                 UpdateBrain(message);
                 if (message.ToLower().Contains(Settings.Default.BotName)) {
                     output = OutputBrain();
@@ -39,22 +42,39 @@ namespace MixerTestsaBot {
         private string? ParseQuoteCommand(string message) {
             string? output = null;
             var info = message.Split(' ');
-            if(info.Count() == 1) {
+            if (info.Count() == 1) {
                 output = GetQuote();
-            } else if (info.Count() == 2) {
+            }
+            else if (info.Count() == 2) {
                 output = GetQuote(info[1]);
-            } else {
+            }
+            else {
                 SaveQuote(message);
             }
             return output;
         }
 
-        private string GetQuote(string? User = null) {
-            return "quotes" + User;
+        private string? GetQuote(string? user = null) {
+            var users = Quotes.Select(x => x.Key).ToList();
+            if (user == null) {
+                user = users[Rng.Next(users.Count())];
+            }
+            user = user.ToLower();
+            if (Quotes.Count(x => x.Key == user) == 0) {
+                return "No quotes for that user";
+            }
+            var quotes = Quotes.First(x => x.Key == user).Value;
+            return user + ": " + quotes[Rng.Next(quotes.Count())];
         }
 
         private void SaveQuote(string message) {
-
+            var info = message.Split(' ');
+            var user = info[1].ToLower();
+            info[0] = "";
+            info[1] = "";
+            var final = string.Join("", info).TrimStart(' ').TrimEnd(' ');
+            Quotes = addToInputs(user, final, Quotes);
+            Save(QuoteFile, Quotes);
         }
 
         #endregion
@@ -71,7 +91,33 @@ namespace MixerTestsaBot {
         }
 
         private string OutputBrain() {
-            return "brain";
+            var key = Rng.Next(Brain.Count);
+            string returnString = Brain.ElementAt(key).Key;
+            string firstKey = returnString.Split(' ')[0];
+            string secondKey = returnString.Split(' ')[1];
+            while (true) {
+                var temp = secondKey;
+                secondKey = getRandomValue(firstKey + " " + secondKey);
+                if (secondKey.Count() == 0) {
+                    break;
+                }
+                if (returnString.Count() + secondKey.Count() > MAXGEN) {
+                    break;
+                }
+                returnString += " " + secondKey;
+                firstKey = temp;
+            }
+
+            return returnString;
+        }
+
+        private string getRandomValue(string key) {
+            if (Brain.ContainsKey(key)) {
+                var list = Brain[key];
+                var listKey = Rng.Next(list.Count());
+                return list.ElementAt(listKey);
+            }
+            return "";
         }
 
         #endregion
@@ -98,7 +144,8 @@ namespace MixerTestsaBot {
                     item = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(text);
                 }
                 return item;
-            } else {
+            }
+            else {
                 return item;
             }
 

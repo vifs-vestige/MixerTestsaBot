@@ -8,5 +8,8 @@
     <Setting Name="BotName" Type="System.String" Scope="User">
       <Value Profile="(Default)">testsabot</Value>
     </Setting>
+    <Setting Name="Channel" Type="System.String" Scope="User">
+      <Value Profile="(Default)">vifs</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

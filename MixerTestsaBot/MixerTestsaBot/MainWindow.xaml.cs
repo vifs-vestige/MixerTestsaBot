@@ -41,10 +41,11 @@ namespace MixerTestsaBot {
 
             if (Connection != null) {
                 User = await Connection.Users.GetCurrentUser();
-                Channel = await Connection.Channels.GetChannel(User.username);
+                Channel = await Connection.Channels.GetChannel(Settings.Default.Channel);
                 ChatClient = await ChatClient.CreateFromChannel(Connection, Channel);
 
                 ChatClient.OnMessageOccurred += ChatClient_MessageOccurred;
+                ChatClient.OnDisconnectOccurred += ChatClient_OnDisconnectOccurred;
 
                 if (await ChatClient.Connect() && await ChatClient.Authenticate()) {
                     Log("connected");
@@ -54,11 +55,24 @@ namespace MixerTestsaBot {
 
         private void ChatClient_MessageOccurred(object sender, ChatMessageEventModel e) {
             var message = new ChatMessage(e);
-            Log(message.UserName + ": " + message.Message);
-            var output = Bot.parseInput(message.Message);
-            if(output != null) {
-                ChatClient.SendMessage(output);
+            if (message.UserName != Settings.Default.BotName) {
+                Log(message.UserName + ": " + message.Message);
+                var output = Bot.parseInput(message.Message);
+                if (output != null) {
+                    ChatClient.SendMessage(output);
+                }
             }
+        }
+
+        private async void ChatClient_OnDisconnectOccurred(object sender, System.Net.WebSockets.WebSocketCloseStatus e) {
+            Log("Disconnection Occurred, attempting reconnection...");
+
+            do {
+                await Task.Delay(2500);
+            }
+            while (!await ChatClient.Connect() && !await ChatClient.Authenticate());
+
+            Log("Reconnection successful");
         }
 
         public void Log(string stuff) {
