@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace MixerTestsaBot {
     class ChatBot {
@@ -21,7 +22,7 @@ namespace MixerTestsaBot {
             Quotes = Load(QuoteFile);
         }
 
-        public string? parseInput(string message) {
+        public string? parseInput(string message, string user) {
             string? output = null;
             if (message.StartsWith("!")) {
                 if (message.ToLower().StartsWith("!quote")) {
@@ -29,9 +30,9 @@ namespace MixerTestsaBot {
                 }
             }
             else {
-                UpdateBrain(message);
+                UpdateBrain(Regex.Replace(message, Settings.Default.BotName, "{user}", RegexOptions.IgnoreCase));
                 if (message.ToLower().Contains(Settings.Default.BotName)) {
-                    output = OutputBrain();
+                    output = OutputBrain().Replace("{user}", user);
                 }
             }
             return output;
@@ -81,6 +82,7 @@ namespace MixerTestsaBot {
 
         #region brain
         private void UpdateBrain(string message) {
+
             var inputSplit = message.Split(' ');
             for (int i = 0; i < (inputSplit.Count() - 2); i++) {
                 var key = inputSplit[i] + ' ' + inputSplit[i + 1];

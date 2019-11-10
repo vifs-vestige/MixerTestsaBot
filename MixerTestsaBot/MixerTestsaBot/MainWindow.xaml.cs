@@ -57,7 +57,7 @@ namespace MixerTestsaBot {
             var message = new ChatMessage(e);
             if (message.UserName != Settings.Default.BotName) {
                 Log(message.UserName + ": " + message.Message);
-                var output = Bot.parseInput(message.Message);
+                var output = Bot.parseInput(message.Message, message.UserName);
                 if (output != null) {
                     ChatClient.SendMessage(output);
                 }
